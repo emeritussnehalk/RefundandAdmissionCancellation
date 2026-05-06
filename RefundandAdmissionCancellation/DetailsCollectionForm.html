@@ -1,0 +1,1083 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Refund / Cancellation Request</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --card: #ffffff;
+      --ink: #1a1a1a;
+      --muted: #6b6f76;
+      --line: #d8d8d8;
+      --accent: #2f6f6d;
+      --warn: #b45309;
+      --error: #b42318;
+      --ok: #0f766e;
+      --shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+      --panel: #fff8e6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 32px auto 80px;
+      padding: 0 20px;
+    }
+
+    header {
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 12px;
+    }
+
+    .banner {
+      background: #fff8e6;
+      border: 1px solid #f3d19c;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #7a4a02;
+      box-shadow: var(--shadow);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px 20px 20px;
+      margin-top: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin: 0 0 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    input[readonly],
+    .readonly {
+      background: #f3f3f3;
+      color: #4c4f54;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .helper {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .error-text {
+      color: var(--error);
+      font-size: 12px;
+      display: none;
+    }
+
+    .error-text.active {
+      display: block;
+    }
+
+    .note {
+      background: #fef3c7;
+      border: 1px dashed #f1c27b;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: #7a4a02;
+      font-size: 13px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px 16px;
+    }
+
+    .summary div {
+      font-size: 14px;
+    }
+
+    .summary span {
+      display: block;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #eef2f2;
+      color: #2a5050;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      padding: 10px 18px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border-color: #c9c9c9;
+      color: #333;
+    }
+
+    .btn-primary:disabled,
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: #111;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 6px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .validation-summary {
+      color: var(--error);
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .validation-summary.active {
+      display: block;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal[hidden] {
+      display: none;
+    }
+
+    .modal-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      width: min(720px, 100%);
+      max-height: 85vh;
+      overflow: auto;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 680px) {
+      main {
+        margin: 20px auto 60px;
+      }
+
+      .slider-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Refund / Cancellation Request</h1>
+      <div class="banner">
+        Please review the refund details carefully before submitting. Once submitted, the request cannot be edited.
+      </div>
+    </header>
+
+    <div id="app">
+      <form id="refundForm" novalidate>
+        <section class="card" aria-labelledby="program-details">
+          <h2 id="program-details">Section A: Programme Details</h2>
+          <div class="grid">
+            <div class="field">
+              <label>Programme Name</label>
+              <input class="readonly" type="text" value="MBA - Digital Strategy" readonly />
+            </div>
+            <div class="field">
+              <label>Enrollment ID</label>
+              <input class="readonly" type="text" value="ENR-123456" readonly />
+            </div>
+            <div class="field">
+              <label>Program Start Date</label>
+              <input class="readonly" type="date" value="2026-02-10" readonly />
+            </div>
+            <div class="field">
+              <label>Amount Paid</label>
+              <input id="amountPaid" class="readonly" type="text" value="&#8377; 120,000" readonly />
+            </div>
+            <div class="field">
+              <label for="paymentMode">Payment Mode (system detected)</label>
+              <select id="paymentMode" name="paymentMode">
+                <option value="Self Paid">Self Paid</option>
+                <option value="Self+Loan">Self+Loan</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="university">University (system detected)</label>
+              <select id="university" name="university">
+                <option value="VIT">VIT</option>
+                <option value="BU">BU</option>
+                <option value="UMass Global">UMass Global</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="refund-reason">
+          <h2 id="refund-reason">Section B: Refund Reason</h2>
+          <div class="grid">
+            <div class="field">
+              <label for="reason">Reason for Refund *</label>
+              <select id="reason" name="reason" required aria-describedby="reasonError">
+                <option value="">Select a reason</option>
+                <option>Personal / Family</option>
+                <option>Financial</option>
+                <option>Professional / Work</option>
+                <option>Course & Curriculum</option>
+                <option>Medical</option>
+                <option>School Rejected</option>
+                <option>DEB Verification Issues</option>
+                <option>No Reason / Others</option>
+              </select>
+              <span id="reasonError" class="error-text">Please choose a reason.</span>
+            </div>
+            <div id="otherReasonWrap" class="field" hidden>
+              <label for="otherReason">Please specify (max 2000 chars) *</label>
+              <textarea id="otherReason" maxlength="2000" aria-describedby="otherReasonMeta otherReasonError"></textarea>
+              <div class="inline">
+                <span id="otherReasonMeta" class="helper">0 / 2000</span>
+                <span id="otherReasonError" class="error-text">Please enter a reason (1-2000 chars).</span>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="card" aria-labelledby="bank-details">
+          <h2 id="bank-details">Section C: Bank Details</h2>
+          <div id="bankDirect">
+            <div class="grid">
+              <div class="field">
+                <label for="accName">Account Holder Name *</label>
+                <input id="accName" name="accName" type="text" required />
+                <span class="error-text" id="accNameError">Account holder name is required.</span>
+              </div>
+              <div class="field">
+                <label for="accNumber">Account Number *</label>
+                <input id="accNumber" name="accNumber" type="text" inputmode="numeric" required aria-describedby="accNumberError" />
+                <span class="error-text" id="accNumberError">Enter 9 to 18 digit account number.</span>
+              </div>
+              <div class="field">
+                <label for="bankName">Bank Name *</label>
+                <input id="bankName" name="bankName" type="text" required />
+                <span class="error-text" id="bankNameError">Bank name is required.</span>
+              </div>
+              <div class="field">
+                <label for="branchName">Branch Name *</label>
+                <input id="branchName" name="branchName" type="text" required />
+                <span class="error-text" id="branchNameError">Branch name is required.</span>
+              </div>
+              <div class="field">
+                <label for="ifsc">IFSC Code *</label>
+                <input id="ifsc" name="ifsc" type="text" required aria-describedby="ifscError" />
+                <span class="error-text" id="ifscError">Enter a valid IFSC (e.g., ABCD0EF1234).</span>
+              </div>
+              <div class="field">
+                <label for="chequeFile">Cancelled Cheque (PDF/JPG/PNG, max 5MB) *</label>
+                <input id="chequeFile" name="chequeFile" type="file" accept=".pdf,.png,.jpg,.jpeg" aria-describedby="chequeError" />
+                <span class="helper">Upload a clear scan or photo (max 5MB).</span>
+                <span class="error-text" id="chequeError">Please upload a PDF/JPG/PNG file under 5MB.</span>
+              </div>
+              <div class="field">
+                <label for="signatureFile">Signature Photo (JPG/PNG, max 5MB) *</label>
+                <input id="signatureFile" name="signatureFile" type="file" accept=".png,.jpg,.jpeg" aria-describedby="signatureError" />
+                <span class="helper">Upload a clear signature photo (max 5MB).</span>
+                <span class="error-text" id="signatureError">Please upload a JPG/PNG file under 5MB.</span>
+              </div>
+            </div>
+          </div>
+          <div id="bankLoan" hidden>
+            <div class="grid">
+              <div class="field">
+                <label>Loan Provider</label>
+                <input id="loanProvider" class="readonly" type="text" value="Propelled" readonly />
+              </div>
+              <div class="field">
+                <label>Refund Account</label>
+                <input class="readonly" type="text" value="As per loan provider records" readonly />
+              </div>
+            </div>
+            <div class="note">
+              Loan details are auto-fetched. Refund will be credited to the loan provider account. Bank details cannot be changed.
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="refund-summary">
+          <h2 id="refund-summary">Section D: Refund Review Summary</h2>
+          <div class="summary" id="summaryGrid">
+            <div>Refund Category<span id="category">Category 1</span></div>
+            <div>Program Fee Paid<span id="feePaid">&#8377; 120,000</span></div>
+            <div>Expected TAT<span>15-20 business days</span></div>
+            <div id="refundDestination" hidden>Refund Destination<span>Loan Provider</span></div>
+          </div>
+          <p class="helper" style="margin-top: 10px;">
+            Final refund assessment, if any, will be completed after internal review as per the applicable refund policy.
+          </p>
+        </section>
+
+        <section class="card" aria-labelledby="policy">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <h2 id="policy" style="margin: 0;">Section E: Refund Policy (Auto-selected by date)</h2>
+            <button type="button" id="viewPolicyBtn" class="btn-secondary">View Policy</button>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label>Request Date (locked for this request)</label>
+              <input id="requestDate" class="readonly" type="date" readonly />
+            </div>
+            <div class="field">
+              <label>Policy Period</label>
+              <input id="policyRange" class="readonly" type="text" value="-" readonly />
+            </div>
+            <div class="field">
+              <label>Policy Version</label>
+              <input id="policyVersion" class="readonly" type="text" value="-" readonly />
+            </div>
+          </div>
+          <div class="note" style="margin-top: 12px;">
+            Policy dates and inputs are configurable and will be kept up to date by Ashlesha's team. The date shown above will not change for this student after submission.
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="terms">
+          <h2 id="terms">Section G: Terms & Consent</h2>
+          <div class="field">
+            <label class="inline" for="consent">
+              <input id="consent" type="checkbox" />
+              <span id="consentText">I agree with the refund policy and terms & conditions. I understand that the final refund decision, if any, will be determined after review and verification as per the applicable refund policy. I acknowledge that this request cannot be modified once submitted.</span>
+            </label>
+            <span class="helper">Final refund decision, if any, will be communicated after the applicable review process.</span>
+          </div>
+          <div id="validationSummary" class="validation-summary" role="alert">
+            Please fix the highlighted fields before submitting.
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="actions">
+          <h2 id="actions">Section H: Actions</h2>
+          <div class="actions">
+            <button type="button" id="cancelBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" id="submitRefundBtn" class="btn-primary" disabled>Submit Refund / Cancellation Request</button>
+          </div>
+        </section>
+      </form>
+    </div>
+  </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite">Cancelled, no ticket created.</div>
+
+    <div id="termsModal" class="modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+        <h3 id="termsTitle" style="margin: 0;">Refund Policy & Terms</h3>
+        <div class="note" style="margin-top: 12px;">
+          Please read and accept the terms below to proceed.
+        </div>
+        <div style="margin-top: 14px; font-size: 14px; color: #303236;">
+          <ol style="padding-left: 20px; margin: 0; display: grid; gap: 10px;">
+            <li>
+              <strong>Applicability of Refund Policy:</strong>
+              I understand that my refund request will be governed by the refund policy applicable on the date on which I submit this request (“Date Applied”). The applicable policy, including refund percentage, charges, and conditions, will be locked at the time of submission and will not change even if the policy is modified at a later date.
+            </li>
+            <li>
+              <strong>Refund Amount Calculation:</strong>
+              I acknowledge that the refund amount displayed is calculated strictly in accordance with the applicable refund policy; certain components such as application fees and other specified charges may be non-refundable; and the refund amount shown is indicative and subject to change based on final verification and approval.
+            </li>
+            <li>
+              <strong>Processing Timelines:</strong>
+              I understand that the standard refund processing timeline is 15–20 business days from the date of valid request submission; delays may occur due to third-party dependencies, banking processes, or institutional approvals; and business days exclude weekends and public holidays.
+            </li>
+            <li>
+              <strong>Lending Partner (Loan) Refunds:</strong>
+              I acknowledge that any refund amount attributable to the loan component will be credited directly to the lending partner; the institution and platform are not responsible for any adjustments, settlements, interest calculations, or shortfalls between me and the lending partner; and any reconciliation or dispute with the lending partner is solely my responsibility.
+            </li>
+            <li>
+              <strong>Split Payment Refunds (Self+Loan):</strong>
+              I acknowledge that refunds may be processed separately for each component; timelines for refunding the direct payment and the loan portion may differ; and the institution may treat such refunds as distinct financial transactions while presenting them as a consolidated request for tracking purposes.
+            </li>
+            <li>
+              <strong>Exception-Based Refunds:</strong>
+              I understand that in exceptional circumstances, a full or modified refund may be approved at the discretion of the institution; such exceptions require internal approval and supporting documentation; and approval of an exception does not establish a precedent for future cases.
+            </li>
+            <li>
+              <strong>Accuracy of Information:</strong>
+              I confirm that all information, documents, and bank details provided by me are accurate and complete. Any incorrect or misleading information may result in delays, rejection, or recovery of funds already disbursed.
+            </li>
+            <li>
+              <strong>Withdrawal of Refund Request:</strong>
+              I understand that only I, as the student, may withdraw my refund request; withdrawal is permitted only until the refund has been sent for processing; and upon withdrawal, no refund will be processed and the request will be closed permanently.
+            </li>
+            <li>
+              <strong>Escalation:</strong>
+              I acknowledge that if my refund request exceeds 15 business days without completion, I may raise an escalation through the provided channel. Escalation does not guarantee expedited processing but ensures additional review.
+            </li>
+            <li>
+              <strong>Finality & Acceptance:</strong>
+              I acknowledge that submission of this request constitutes a formal request for admission cancellation and/or refund. The institution’s decision, taken in accordance with the applicable refund policy and these terms, shall be final and binding.
+            </li>
+          </ol>
+          <p style="margin-top: 12px;">
+            <strong>Consent Declaration:</strong> I have read, understood, and agree to the Refund Policy and the above Terms & Conditions. I acknowledge that the refund amount displayed is subject to final verification and processing.
+          </p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="termsCancel" class="btn-secondary">Cancel</button>
+          <button type="button" id="termsAgree" class="btn-primary">I Agree</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="policyModal" class="modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="policyTitle">
+        <h3 id="policyTitle" style="margin: 0;">Refund Policy Details</h3>
+        <div class="note" style="margin-top: 12px;">
+          The applicable policy is locked to your Date Applied.
+        </div>
+        <div id="policyModalBody" style="margin-top: 12px; font-size: 14px; color: #303236;"></div>
+        <div class="modal-actions">
+          <button type="button" id="policyClose" class="btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    const form = document.getElementById("refundForm");
+    const paymentMode = document.getElementById("paymentMode");
+    const university = document.getElementById("university");
+    const reason = document.getElementById("reason");
+    const otherReasonWrap = document.getElementById("otherReasonWrap");
+    const otherReason = document.getElementById("otherReason");
+    const otherReasonMeta = document.getElementById("otherReasonMeta");
+    const category = document.getElementById("category");
+    const feePaid = document.getElementById("feePaid");
+    const consent = document.getElementById("consent");
+    const consentText = document.getElementById("consentText");
+    const submitRefundBtn = document.getElementById("submitRefundBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const toast = document.getElementById("toast");
+    const validationSummary = document.getElementById("validationSummary");
+    const bankDirect = document.getElementById("bankDirect");
+    const bankLoan = document.getElementById("bankLoan");
+    const refundDestination = document.getElementById("refundDestination");
+    const requestDateInput = document.getElementById("requestDate");
+    const policyRange = document.getElementById("policyRange");
+    const policyVersion = document.getElementById("policyVersion");
+    const termsModal = document.getElementById("termsModal");
+    const termsCancel = document.getElementById("termsCancel");
+    const termsAgree = document.getElementById("termsAgree");
+    const viewPolicyBtn = document.getElementById("viewPolicyBtn");
+    const policyModal = document.getElementById("policyModal");
+    const policyModalBody = document.getElementById("policyModalBody");
+    const policyClose = document.getElementById("policyClose");
+    const amountPaid = 120000;
+    const requestDateKey = "refundRequestDate";
+    const MAX_DOC_PREVIEW_SIZE = 900 * 1024;
+
+    const bankFields = {
+      accName: document.getElementById("accName"),
+      accNumber: document.getElementById("accNumber"),
+      bankName: document.getElementById("bankName"),
+      branchName: document.getElementById("branchName"),
+      ifsc: document.getElementById("ifsc")
+    };
+    const chequeFile = document.getElementById("chequeFile");
+    const signatureFile = document.getElementById("signatureFile");
+
+    const FEE_PAYMENT_TYPE_LABELS = {
+      Semester: "Semester fees",
+      Annual: "Annual fees",
+      FullFeeSelf: "Full fees - Self",
+      FullFeeSelfLoan: "Full fees - Self + loan"
+    };
+
+    const standardAdmissionSlabs = [
+      { name: "Category 1", fromDay: -9999, toDay: -15, refundPercent: 100, meaning: "15 days or more before last date of admission" },
+      { name: "Category 2", fromDay: -14, toDay: -1, refundPercent: 90, meaning: "Less than 15 days before last date of admission" },
+      { name: "Category 3", fromDay: 0, toDay: 15, refundPercent: 80, meaning: "Within 15 days after last date of admission" },
+      { name: "Category 4", fromDay: 16, toDay: 30, refundPercent: 50, meaning: "More than 15 days and up to 30 days after last date of admission" },
+      { name: "Category 5", fromDay: 31, toDay: 9999, refundPercent: 0, meaning: "More than 30 days after last date of admission" }
+    ];
+
+    const policyConfig = [
+      {
+        version: "Policy A",
+        university: "VIT",
+        effectiveFrom: "2026-01-01",
+        effectiveTo: "2026-12-31",
+        admissionLastDate: "2026-01-31",
+        applicationFee: 0,
+        applicationFeeNonRefundable: true,
+        defaultFeePaymentType: "FullFeeSelfLoan",
+        firstYearFee: 90000,
+        totalProgramFee: 180000,
+        refundYear2AdvanceInFull: true,
+        discountRemovalForUpfront: true,
+        scholarshipUsesActualPaid: true,
+        deductionMode: "AdmissionDateSlab",
+        flatDeductionAmount: 0,
+        categories: standardAdmissionSlabs
+      },
+      {
+        version: "Policy B",
+        university: "BU",
+        effectiveFrom: "2026-01-01",
+        effectiveTo: "2026-12-31",
+        admissionLastDate: "2026-01-31",
+        applicationFee: 3000,
+        applicationFeeNonRefundable: true,
+        defaultFeePaymentType: "Annual",
+        firstYearFee: 100000,
+        totalProgramFee: 200000,
+        refundYear2AdvanceInFull: true,
+        discountRemovalForUpfront: true,
+        scholarshipUsesActualPaid: true,
+        deductionMode: "AdmissionDateSlab",
+        flatDeductionAmount: 0,
+        categories: standardAdmissionSlabs
+      },
+      {
+        version: "Policy C",
+        university: "UMass Global",
+        effectiveFrom: "2026-01-01",
+        effectiveTo: "2026-12-31",
+        admissionLastDate: "2026-01-31",
+        applicationFee: 3000,
+        applicationFeeNonRefundable: true,
+        defaultFeePaymentType: "Annual",
+        firstYearFee: 95000,
+        totalProgramFee: 190000,
+        refundYear2AdvanceInFull: true,
+        discountRemovalForUpfront: true,
+        scholarshipUsesActualPaid: true,
+        deductionMode: "AdmissionDateSlab",
+        flatDeductionAmount: 0,
+        categories: standardAdmissionSlabs
+      }
+    ];
+
+    const formatInr = (value) => {
+      const formatted = new Intl.NumberFormat("en-IN").format(Math.round(value));
+      return `₹ ${formatted}`;
+    };
+
+    const diffDays = (dateA, dateB) => {
+      const left = new Date(dateA);
+      const right = new Date(dateB);
+      if (Number.isNaN(left.getTime()) || Number.isNaN(right.getTime())) return 0;
+      return Math.floor((left - right) / (1000 * 60 * 60 * 24));
+    };
+
+    const normalizePaymentMode = (value) => {
+      const mode = String(value || "").trim();
+      if (mode === "Direct Payment") return "Self Paid";
+      if (mode === "Direct + Loan" || mode.startsWith("Loan -")) return "Self+Loan";
+      if (mode === "Self+Loan") return "Self+Loan";
+      return "Self Paid";
+    };
+
+    const isLoanCase = () => normalizePaymentMode(paymentMode.value).toLowerCase().includes("loan");
+
+    const isFullFeeType = (feeType) => feeType === "FullFeeSelf" || feeType === "FullFeeSelfLoan";
+
+    const computeEstimate = (policy, requestDate) => {
+      const applicationFee = policy.applicationFeeNonRefundable ? Number(policy.applicationFee || 0) : 0;
+      let deductionValue = 0;
+      let finalValue = 0;
+      let matchedCategory = {
+        name: "Flat Deduction",
+        refundPercent: 0,
+        meaning: ""
+      };
+
+      if (policy.deductionMode === "FlatAmount") {
+        deductionValue = Math.min(amountPaid, applicationFee + Number(policy.flatDeductionAmount || 0));
+        finalValue = Math.max(amountPaid - deductionValue, 0);
+        return { deductionValue, finalValue, matchedCategory };
+      }
+
+      const daysFromAdmissionLastDate = diffDays(requestDate, policy.admissionLastDate);
+      const sortedCategories = [...policy.categories].sort((a, b) => a.fromDay - b.fromDay);
+      matchedCategory = sortedCategories.find((cat) => (
+        daysFromAdmissionLastDate >= Number(cat.fromDay) && daysFromAdmissionLastDate <= Number(cat.toDay)
+      )) || sortedCategories[sortedCategories.length - 1];
+      const refundPercent = Number(matchedCategory.refundPercent || 0);
+      const paidProgrammeAmount = Math.max(amountPaid - applicationFee, 0);
+      const feePaymentType = isLoanCase() && policy.defaultFeePaymentType === "FullFeeSelf"
+        ? "FullFeeSelfLoan"
+        : policy.defaultFeePaymentType;
+      const fullUpfront = isFullFeeType(feePaymentType);
+      const firstYearFee = Number(policy.firstYearFee || paidProgrammeAmount);
+      const year2Advance = policy.refundYear2AdvanceInFull
+        ? Math.max(paidProgrammeAmount - firstYearFee, 0)
+        : 0;
+      const year1PaidPortion = Math.max(paidProgrammeAmount - year2Advance, 0);
+      const year1RefundBase = fullUpfront && policy.discountRemovalForUpfront
+        ? Math.min(firstYearFee, paidProgrammeAmount)
+        : Math.min(year1PaidPortion, firstYearFee || year1PaidPortion);
+      finalValue = Math.min(Math.max((year1RefundBase * refundPercent / 100) + year2Advance, 0), paidProgrammeAmount);
+      deductionValue = amountPaid - finalValue;
+      return { deductionValue, finalValue, matchedCategory };
+    };
+
+    const showToast = () => {
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2000);
+    };
+
+    const updateReasonVisibility = () => {
+      if (reason.value === "No Reason / Others") {
+        otherReasonWrap.hidden = false;
+      } else {
+        otherReasonWrap.hidden = true;
+        otherReason.value = "";
+        otherReasonMeta.textContent = "0 / 2000";
+      }
+      validateForm(false);
+    };
+
+    const updatePaymentMode = () => {
+      paymentMode.value = normalizePaymentMode(paymentMode.value);
+      const isSelfPaid = paymentMode.value === "Self Paid";
+      const isSelfPlusLoan = paymentMode.value === "Self+Loan";
+      if (isSelfPaid) {
+        bankDirect.hidden = false;
+        bankLoan.hidden = true;
+      } else if (isSelfPlusLoan) {
+        bankDirect.hidden = false;
+        bankLoan.hidden = false;
+      }
+
+      if (isSelfPlusLoan) {
+        document.getElementById("loanProvider").value = "Linked Lending Partner";
+      }
+
+      refundDestination.hidden = isSelfPaid;
+      refundDestination.querySelector("span").textContent = "Student + Loan Provider";
+      validateForm(false);
+    };
+
+    const getLockedRequestDate = () => {
+      let stored = localStorage.getItem(requestDateKey);
+      if (!stored) {
+        stored = new Date().toISOString().slice(0, 10);
+        localStorage.setItem(requestDateKey, stored);
+      }
+      return stored;
+    };
+
+    const resolvePolicy = (requestDate) => {
+      const selectedUniversity = university.value || "VIT";
+      const scoped = policyConfig.filter((policy) => (policy.university || "VIT") === selectedUniversity);
+      const match = scoped.find((policy) => (
+        requestDate >= policy.effectiveFrom && requestDate <= policy.effectiveTo
+      ));
+      return match || scoped[0] || policyConfig[0];
+    };
+
+    const renderPolicy = () => {
+      const requestDate = getLockedRequestDate();
+      const policy = resolvePolicy(requestDate);
+      requestDateInput.value = requestDate;
+      policyRange.value = `${policy.effectiveFrom} to ${policy.effectiveTo}`;
+      policyVersion.value = policy.version;
+
+      if (policy.deductionMode === "FlatAmount") {
+        policyModalBody.innerHTML = `
+          <div class="summary">
+            <div>University<span>${policy.university}</span></div>
+            <div>Policy Version<span>${policy.version}</span></div>
+            <div>Policy Period<span>${policy.effectiveFrom} to ${policy.effectiveTo}</span></div>
+            <div>Last Date of Admission<span>${policy.admissionLastDate}</span></div>
+            <div>Application Fee<span>${formatInr(policy.applicationFee)}</span></div>
+            <div>Flat Deduction<span>${formatInr(policy.flatDeductionAmount || 0)}</span></div>
+          </div>
+        `;
+        return;
+      }
+      const categoryRows = policy.categories.map((cat) => `
+          <div>${cat.name} (${cat.fromDay} to ${cat.toDay} days)<span>${cat.refundPercent}% refund</span></div>
+        `).join("");
+      policyModalBody.innerHTML = `
+        <div class="summary">
+          <div>University<span>${policy.university}</span></div>
+          <div>Policy Version<span>${policy.version}</span></div>
+          <div>Policy Period<span>${policy.effectiveFrom} to ${policy.effectiveTo}</span></div>
+          <div>Last Date of Admission<span>${policy.admissionLastDate}</span></div>
+          <div>Application Fee<span>${formatInr(policy.applicationFee)}</span></div>
+          <div>Default Fee Type<span>${FEE_PAYMENT_TYPE_LABELS[policy.defaultFeePaymentType] || policy.defaultFeePaymentType}</span></div>
+          <div>Year 1 Fee Without Discount<span>${formatInr(policy.firstYearFee || 0)}</span></div>
+          ${categoryRows}
+        </div>
+      `;
+    };
+
+    const updateSummary = () => {
+      feePaid.textContent = formatInr(amountPaid);
+
+      const requestDate = getLockedRequestDate();
+      const policy = resolvePolicy(requestDate);
+      const estimate = computeEstimate(policy, requestDate);
+      category.textContent = estimate.matchedCategory.name || "Flat Deduction";
+      consentText.textContent = "I agree with the refund policy and terms & conditions. I understand that the final refund decision, if any, will be determined after review and verification as per the applicable refund policy. I acknowledge that this request cannot be modified once submitted.";
+
+      validateForm(false);
+    };
+
+    const setError = (input, messageId, isActive) => {
+      const message = document.getElementById(messageId);
+      if (isActive) {
+        message.classList.add("active");
+        input.setAttribute("aria-invalid", "true");
+      } else {
+        message.classList.remove("active");
+        input.removeAttribute("aria-invalid");
+      }
+    };
+
+    const validateBankFields = () => {
+      let valid = true;
+      const nameValid = bankFields.accName.value.trim().length > 0;
+      setError(bankFields.accName, "accNameError", !nameValid);
+      valid = valid && nameValid;
+
+      const accValue = bankFields.accNumber.value.trim();
+      const accValid = /^\d{9,18}$/.test(accValue);
+      setError(bankFields.accNumber, "accNumberError", !accValid);
+      valid = valid && accValid;
+
+      const bankValid = bankFields.bankName.value.trim().length > 0;
+      setError(bankFields.bankName, "bankNameError", !bankValid);
+      valid = valid && bankValid;
+
+      const branchValid = bankFields.branchName.value.trim().length > 0;
+      setError(bankFields.branchName, "branchNameError", !branchValid);
+      valid = valid && branchValid;
+
+      const ifscValue = bankFields.ifsc.value.trim().toUpperCase();
+      bankFields.ifsc.value = ifscValue;
+      const ifscValid = /^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscValue);
+      setError(bankFields.ifsc, "ifscError", !ifscValid);
+      valid = valid && ifscValid;
+
+      const file = chequeFile.files[0];
+      const fileValid = !!file &&
+        (file.type == "application/pdf" || file.type == "image/png" || file.type == "image/jpeg") &&
+        file.size <= 5 * 1024 * 1024;
+      setError(chequeFile, "chequeError", !fileValid);
+      valid = valid && fileValid;
+
+      const sigFile = signatureFile.files[0];
+      const sigValid = !!sigFile &&
+        (sigFile.type == "image/png" || sigFile.type == "image/jpeg") &&
+        sigFile.size <= 5 * 1024 * 1024;
+      setError(signatureFile, "signatureError", !sigValid);
+      valid = valid && sigValid;
+
+      return valid;
+    };
+
+    const validateReason = () => {
+      const reasonValid = reason.value !== "";
+      setError(reason, "reasonError", !reasonValid);
+      let otherValid = true;
+      if (reason.value === "No Reason / Others") {
+        const val = otherReason.value.trim();
+        otherValid = val.length > 0 && val.length <= 2000;
+        setError(otherReason, "otherReasonError", !otherValid);
+      }
+      return reasonValid && otherValid;
+    };
+
+    const validateForm = (showSummary) => {
+      const reasonOk = validateReason();
+      const requiresBank = paymentMode.value === "Self Paid" || paymentMode.value === "Self+Loan";
+      const bankOk = !requiresBank || validateBankFields();
+      const consentOk = consent.checked;
+
+      const allOk = reasonOk && bankOk && consentOk;
+      if (showSummary) {
+        validationSummary.classList.toggle("active", !allOk);
+      } else {
+        validationSummary.classList.remove("active");
+      }
+      return allOk;
+    };
+
+    const toDataUrl = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Unable to read file"));
+      reader.readAsDataURL(file);
+    });
+
+    const serializeFileForStorage = async (file) => {
+      if (!file) return null;
+      const doc = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        dataUrl: ""
+      };
+      if (file.size <= MAX_DOC_PREVIEW_SIZE) {
+        try {
+          doc.dataUrl = await toDataUrl(file);
+        } catch (err) {
+          doc.dataUrl = "";
+        }
+      }
+      return doc;
+    };
+
+    const updateSubmitState = () => {
+      submitRefundBtn.disabled = !consent.checked;
+    };
+
+    const resetForm = () => {
+      form.reset();
+      otherReasonMeta.textContent = "0 / 2000";
+      updateReasonVisibility();
+      updatePaymentMode();
+      updateSummary();
+      validationSummary.classList.remove("active");
+    };
+
+    reason.addEventListener("change", updateReasonVisibility);
+    otherReason.addEventListener("input", () => {
+      otherReasonMeta.textContent = `${otherReason.value.length} / 2000`;
+      validateForm(false);
+    });
+    paymentMode.addEventListener("change", () => {
+      updatePaymentMode();
+      updateSummary();
+    });
+    university.addEventListener("change", () => {
+      renderPolicy();
+      updateSummary();
+    });
+    consent.addEventListener("change", () => {
+      updateSubmitState();
+      validateForm(false);
+    });
+
+    consent.addEventListener("click", (event) => {
+      event.preventDefault();
+      termsModal.hidden = false;
+    });
+
+    termsCancel.addEventListener("click", () => {
+      termsModal.hidden = true;
+    });
+
+    termsAgree.addEventListener("click", () => {
+      termsModal.hidden = true;
+      consent.checked = true;
+      updateSubmitState();
+      validateForm(false);
+    });
+
+    viewPolicyBtn.addEventListener("click", () => {
+      policyModal.hidden = false;
+    });
+
+    policyClose.addEventListener("click", () => {
+      policyModal.hidden = true;
+    });
+
+    Object.values(bankFields).forEach((field) => {
+      field.addEventListener("input", () => validateForm(false));
+    });
+    chequeFile.addEventListener("change", () => validateForm(false));
+    signatureFile.addEventListener("change", () => validateForm(false));
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const shouldProceed = window.confirm("Submit this refund / cancellation request?");
+      if (!shouldProceed) {
+        return;
+      }
+      if (!validateForm(true)) {
+        return;
+      }
+
+      const requiresBank = paymentMode.value === "Self Paid" || paymentMode.value === "Self+Loan";
+      let bankDocuments = { cheque: null, signature: null };
+      if (requiresBank) {
+        bankDocuments = {
+          cheque: await serializeFileForStorage(chequeFile.files[0]),
+          signature: await serializeFileForStorage(signatureFile.files[0])
+        };
+      }
+
+      const payload = {
+        ticketId: `RFD-${Math.floor(100000 + Math.random() * 900000)}`,
+        refundAmount: "Under review",
+        actualAmountPaid: amountPaid,
+        paymentMode: normalizePaymentMode(paymentMode.value),
+        university: university.value,
+        subStatus: "Request Submitted",
+        appliedDate: getLockedRequestDate(),
+        bankDetails: {
+          accName: bankFields.accName.value.trim(),
+          accNumber: bankFields.accNumber.value.trim(),
+          bankName: bankFields.bankName.value.trim(),
+          branchName: bankFields.branchName.value.trim(),
+          ifsc: bankFields.ifsc.value.trim().toUpperCase()
+        },
+        bankDocuments,
+        bankUpdateUsed: false
+      };
+
+      try {
+        localStorage.setItem("refundStatusData", JSON.stringify(payload));
+      } catch (err) {
+        payload.bankDocuments = {
+          cheque: payload.bankDocuments.cheque ? { ...payload.bankDocuments.cheque, dataUrl: "" } : null,
+          signature: payload.bankDocuments.signature ? { ...payload.bankDocuments.signature, dataUrl: "" } : null
+        };
+        localStorage.setItem("refundStatusData", JSON.stringify(payload));
+      }
+      window.location.href = "status.html";
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      const shouldCancel = window.confirm("Cancel this request? Your entries will be cleared.");
+      if (!shouldCancel) {
+        return;
+      }
+      resetForm();
+      showToast();
+    });
+
+    paymentMode.value = normalizePaymentMode(paymentMode.value);
+    updateReasonVisibility();
+    updatePaymentMode();
+    renderPolicy();
+    updateSummary();
+    updateSubmitState();
+  </script>
+
+</body>
+</html>
