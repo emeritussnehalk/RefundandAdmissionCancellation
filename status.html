@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Refund Request Status</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --card: #ffffff;
+      --ink: #1a1a1a;
+      --muted: #6b6f76;
+      --line: #d8d8d8;
+      --accent: #2f6f6d;
+      --warn: #b45309;
+      --error: #b42318;
+      --shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 32px auto 80px;
+      padding: 0 20px;
+    }
+
+    header {
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 12px;
+    }
+
+    .banner {
+      background: #fff8e6;
+      border: 1px solid #f3d19c;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #7a4a02;
+      box-shadow: var(--shadow);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px 20px 20px;
+      margin-top: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    input[readonly],
+    .readonly {
+      background: #f3f3f3;
+      color: #4c4f54;
+    }
+
+    .helper {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .error-text {
+      color: var(--error);
+      font-size: 12px;
+      display: none;
+    }
+
+    .error-text.active {
+      display: block;
+    }
+
+    .note {
+      background: #fef3c7;
+      border: 1px dashed #f1c27b;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: #7a4a02;
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      padding: 10px 18px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border-color: #c9c9c9;
+      color: #333;
+    }
+
+    .btn-warning {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    .btn-primary:disabled,
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-banner {
+      background: #ecfdf3;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: grid;
+      gap: 6px;
+      color: #14532d;
+    }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .status-controls {
+      margin-top: 12px;
+      max-width: 280px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-card {
+      background: #fafafa;
+      border: 1px dashed #d4d4d4;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .status-message {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #303236;
+    }
+
+    .status-detail {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: linear-gradient(135deg, #f8fafc, #ffffff);
+      display: grid;
+      gap: 6px;
+    }
+
+    .status-detail-title {
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #6b7280;
+      font-weight: 700;
+    }
+
+    .status-detail-body {
+      font-size: 15px;
+      color: #1f2937;
+      font-weight: 600;
+    }
+
+    .status-detail-note {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+
+    .status-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .warning-panel {
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 14px;
+      color: #7c2d12;
+      font-size: 13px;
+    }
+
+    .bank-mini {
+      margin-top: 12px;
+      border: 1px dashed #d4d4d4;
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px 18px;
+    }
+
+    .closed-banner {
+      margin-top: 14px;
+      background: #f5f5f5;
+      border: 1px solid #d4d4d4;
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #303236;
+      font-size: 13px;
+    }
+
+    .terms-locked {
+      background: #f5f5f5;
+      border: 1px solid #d4d4d4;
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #4b5563;
+      font-size: 13px;
+    }
+
+    .terms-locked h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .terms-locked ol {
+      padding-left: 18px;
+      margin: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal[hidden] {
+      display: none;
+    }
+
+    .modal-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      width: min(420px, 100%);
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 680px) {
+      main {
+        margin: 20px auto 60px;
+      }
+
+      .actions,
+      .status-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Refund / Cancellation Request</h1>
+      <div class="banner">
+        Please review the refund details carefully. This page reflects your latest request status.
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="status-banner" id="statusBanner">
+        <strong>&#9989; Refund Request Submitted Successfully</strong>
+        <span id="ticketMeta">Ticket ID: -</span>
+        <span id="appliedMeta">Date Applied: -</span>
+        <span id="refundMeta">Refund Amount: -</span>
+        <span>TAT: 15-20 business days</span>
+      </div>
+      <div class="note" style="margin-top: 12px;">
+        Ticket and communication go to RO Sales. Refund amount is subject to change and is governed by the refund policy.
+      </div>
+
+      <div class="status-card">
+        <div class="status-header">
+          <div>
+            <div class="status-badge" id="mainStatus">Open</div>
+            <h2 id="subStatusLabel" style="margin: 8px 0 0;">Request Submitted</h2>
+            <p id="statusMessage" class="status-message">We have received your request and will start reviewing it.</p>
+          </div>
+        </div>
+
+        <div class="status-controls">
+          <div class="field">
+            <label for="simulateStatus">Simulate Status</label>
+            <select id="simulateStatus">
+              <option>Request Submitted</option>
+              <option>Refund Amount Review in Progress</option>
+              <option>Action Required From You</option>
+              <option>Processing Cancellation</option>
+              <option>Application sent for processing</option>
+              <option>Refund completed</option>
+              <option>No refund applicable</option>
+              <option>Request Withdrawn</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="status-detail">
+          <div class="status-detail-title">Current Stage</div>
+          <div id="subStatusNote" class="status-detail-body">Request Submitted</div>
+          <div id="subStatusHint" class="status-detail-note">We have received your request and will start reviewing it.</div>
+        </div>
+
+        <div id="actionRequiredPanel" class="warning-panel" hidden>
+          We need additional information to continue processing your refund.
+        </div>
+
+        <div id="loanInfoPanel" class="note" hidden>
+          Refund will be credited to the loan provider. No bank update is required. A confirmation email will be sent once the university transfers the amount to the loan partner.
+        </div>
+
+        <div id="bankUpdatePanel" class="bank-mini" hidden>
+          <div class="actions" style="margin-top: 0;">
+            <button type="button" id="updateBankBtn" class="btn-secondary">Update Bank Details</button>
+            <span id="bankUpdateFeedback" class="helper"></span>
+          </div>
+          <div id="bankSummary" class="grid" style="margin-top: 12px;">
+            <div class="field">
+              <label>Account Holder Name</label>
+              <input id="bankSummaryName" class="readonly" type="text" readonly />
+            </div>
+            <div class="field">
+              <label>Account Number</label>
+              <input id="bankSummaryNumber" class="readonly" type="text" readonly />
+            </div>
+            <div class="field">
+              <label>Bank Name</label>
+              <input id="bankSummaryBank" class="readonly" type="text" readonly />
+            </div>
+            <div class="field">
+              <label>Branch</label>
+              <input id="bankSummaryBranch" class="readonly" type="text" readonly />
+            </div>
+            <div class="field">
+              <label>IFSC</label>
+              <input id="bankSummaryIfsc" class="readonly" type="text" readonly />
+            </div>
+          </div>
+          <div id="bankUpdateForm" class="grid" style="margin-top: 12px;" hidden>
+            <div class="field">
+              <label for="updAccName">Account Holder Name *</label>
+              <input id="updAccName" type="text" />
+              <span class="error-text" id="updAccNameError">Account holder name is required.</span>
+            </div>
+            <div class="field">
+              <label for="updAccNumber">Account Number *</label>
+              <input id="updAccNumber" type="text" inputmode="numeric" />
+              <span class="error-text" id="updAccNumberError">Enter 9 to 18 digit account number.</span>
+            </div>
+            <div class="field">
+              <label for="updBankName">Bank Name *</label>
+              <input id="updBankName" type="text" />
+              <span class="error-text" id="updBankNameError">Bank name is required.</span>
+            </div>
+            <div class="field">
+              <label for="updBranchName">Branch *</label>
+              <input id="updBranchName" type="text" />
+              <span class="error-text" id="updBranchNameError">Branch name is required.</span>
+            </div>
+            <div class="field">
+              <label for="updIfsc">IFSC *</label>
+              <input id="updIfsc" type="text" />
+              <span class="error-text" id="updIfscError">Enter a valid IFSC (e.g., ABCD0EF1234).</span>
+            </div>
+            <div class="field">
+              <label for="updChequeFile">Cancelled Cheque (PDF/JPG/PNG, max 5MB) *</label>
+              <input id="updChequeFile" type="file" accept=".pdf,.png,.jpg,.jpeg" />
+              <span class="error-text" id="updChequeFileError">Please upload a PDF/JPG/PNG file under 5MB.</span>
+            </div>
+            <div class="field">
+              <label for="updSignatureFile">Signature Photo (JPG/PNG, max 5MB) *</label>
+              <input id="updSignatureFile" type="file" accept=".png,.jpg,.jpeg" />
+              <span class="error-text" id="updSignatureFileError">Please upload a JPG/PNG file under 5MB.</span>
+            </div>
+            <div class="actions" style="margin-top: 4px;">
+              <button type="button" id="saveBankUpdate" class="btn-primary" disabled>Save Bank Details</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="closedBanner" class="closed-banner" hidden></div>
+      
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin: 0 0 8px;">Accepted Terms</h2>
+      <div class="terms-locked" aria-readonly="true">
+        <h3>Accepted by <span id="studentNameLabel">Student</span></h3>
+        <ol>
+          <li>
+            <strong>Applicability of Refund Policy:</strong>
+            I understand that my refund request will be governed by the refund policy applicable on the date on which I submit this request (“Date Applied”). The applicable policy, including refund percentage, charges, and conditions, will be locked at the time of submission and will not change even if the policy is modified at a later date.
+          </li>
+          <li>
+            <strong>Refund Amount Calculation:</strong>
+            I acknowledge that the refund amount displayed is calculated strictly in accordance with the applicable refund policy; certain components such as application fees and other specified charges may be non-refundable; and the refund amount shown is indicative and subject to change based on final verification and approval.
+          </li>
+          <li>
+            <strong>Processing Timelines:</strong>
+            I understand that the standard refund processing timeline is 15–20 business days from the date of valid request submission; delays may occur due to third-party dependencies, banking processes, or institutional approvals; and business days exclude weekends and public holidays.
+          </li>
+          <li>
+            <strong>Lending Partner (Loan) Refunds:</strong>
+            I acknowledge that any refund amount attributable to the loan component will be credited directly to the lending partner; the institution and platform are not responsible for any adjustments, settlements, interest calculations, or shortfalls between me and the lending partner; and any reconciliation or dispute with the lending partner is solely my responsibility.
+          </li>
+          <li>
+            <strong>Split Payment Refunds (Self+Loan):</strong>
+            I acknowledge that refunds may be processed separately for each component; timelines for refunding the direct payment and the loan portion may differ; and the institution may treat such refunds as distinct financial transactions while presenting them as a consolidated request for tracking purposes.
+          </li>
+          <li>
+            <strong>Exception-Based Refunds:</strong>
+            I understand that in exceptional circumstances, a full or modified refund may be approved at the discretion of the institution; such exceptions require internal approval and supporting documentation; and approval of an exception does not establish a precedent for future cases.
+          </li>
+          <li>
+            <strong>Accuracy of Information:</strong>
+            I confirm that all information, documents, and bank details provided by me are accurate and complete. Any incorrect or misleading information may result in delays, rejection, or recovery of funds already disbursed.
+          </li>
+          <li>
+            <strong>Withdrawal of Refund Request:</strong>
+            I understand that only I, as the student, may withdraw my refund request; withdrawal is permitted only until the refund has been sent for processing; and upon withdrawal, no refund will be processed and the request will be closed permanently.
+          </li>
+          <li>
+            <strong>Escalation:</strong>
+            I acknowledge that if my refund request exceeds 15 business days without completion, I may raise an escalation through the provided channel. Escalation does not guarantee expedited processing but ensures additional review.
+          </li>
+          <li>
+            <strong>Finality & Acceptance:</strong>
+            I acknowledge that submission of this request constitutes a formal request for admission cancellation and/or refund. The institution’s decision, taken in accordance with the applicable refund policy and these terms, shall be final and binding.
+          </li>
+        </ol>
+        <p style="margin-top: 10px;">
+          <strong>Consent Declaration:</strong> I have read, understood, and agree to the Refund Policy and the above Terms & Conditions. I acknowledge that the refund amount displayed is subject to final verification and processing.
+        </p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin: 0 0 8px;">Actions</h2>
+      <div class="status-actions">
+        <button type="button" id="withdrawAction" class="btn-warning">Withdraw Application</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="withdrawModal" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="withdrawTitle">
+      <h3 id="withdrawTitle" style="margin:0;">Withdraw Application</h3>
+      <p style="margin-top: 10px;">Refund/ Cancellation Withdrawal Policy & Terms</p>
+      <div style="margin-top: 10px; font-size: 13px; color: #303236; max-height: 300px; overflow: auto; border: 1px solid #e5e7eb; padding: 10px; border-radius: 8px; background: #f9fafb;">
+        By choosing to withdraw a Refund and/or Admission Cancellation request, I acknowledge and agree to the following terms and conditions:
+        <ol style="padding-left: 18px; margin: 8px 0 0; display: grid; gap: 8px;">
+          <li>
+            <strong>Eligibility to Withdraw</strong><br />
+            Only the student who submitted the refund request is permitted to withdraw it. Withdrawal is permitted only until the refund request has been sent for processing. Once the request reaches a non-withdrawable stage, the withdrawal option will no longer be available.
+          </li>
+          <li>
+            <strong>Effect of Withdrawal</strong><br />
+            Upon withdrawal, the refund request will be permanently closed. No refund will be processed after withdrawal. All request details, including refund calculations and policy references, will be archived for audit and compliance purposes.
+          </li>
+          <li>
+            <strong>Irrevocability & Reapplication</strong><br />
+            Withdrawal of a refund request is final and irreversible. A withdrawn request cannot be reopened or reinstated. If I wish to pursue a refund after withdrawal, I understand that I must submit a fresh refund request as a new application.
+          </li>
+          <li>
+            <strong>Policy Applicability on Reapplication</strong><br />
+            I acknowledge that any fresh refund request submitted after withdrawal will be governed by the refund policy applicable on the new Date Applied. I understand that the refund amount, eligibility, and charges for a reapplication may differ from my original request based on the prevailing policy at the time of reapplication.
+          </li>
+          <li>
+            <strong>Policy & Date Locking</strong><br />
+            For every refund request, the applicable refund policy is determined and locked based on the Date Applied. Withdrawal does not alter or invalidate the historical policy and refund calculation stored for audit.
+          </li>
+          <li>
+            <strong>Lending Partner & Split Payment Cases</strong><br />
+            If my payment includes a lending partner (loan), I acknowledge that any coordination already initiated with the lending partner may be discontinued upon withdrawal, where feasible. Any obligations, settlements, or communications with the lending partner remain my sole responsibility. In cases of split payments (Self+Loan), withdrawal applies to the entire refund request, and no partial refunds will be processed.
+          </li>
+          <li>
+            <strong>Communications & Record</strong><br />
+            Upon successful withdrawal, I will receive a confirmation communication containing Ticket ID and date/time of withdrawal. All withdrawal actions are time-stamped, user-validated, and logged for compliance and audit.
+          </li>
+          <li>
+            <strong>Limitation of Liability</strong><br />
+            After withdrawal, the institution and platform shall have no obligation or liability to process or pursue any refund related to the withdrawn request. Any subsequent refund request will be treated as a new, independent request.
+          </li>
+        </ol>
+      </div>
+      <div class="field" style="margin-top: 12px;">
+        <label class="inline" for="withdrawConsent">
+          <input id="withdrawConsent" type="checkbox" />
+          <span>I have read and agree to the Withdrawal Policy & Terms.</span>
+        </label>
+      </div>
+      <div class="field" style="margin-top: 8px;">
+        <label for="withdrawReason">Reason for withdrawal *</label>
+        <textarea id="withdrawReason" rows="3" maxlength="1000"></textarea>
+        <span class="helper" id="withdrawReasonMeta">0 / 1000</span>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="withdrawCancel" class="btn-secondary">Cancel</button>
+        <button type="button" id="withdrawConfirm" class="btn-primary" disabled>Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ticketMeta = document.getElementById("ticketMeta");
+    const refundMeta = document.getElementById("refundMeta");
+    const appliedMeta = document.getElementById("appliedMeta");
+    const studentNameLabel = document.getElementById("studentNameLabel");
+    const withdrawAction = document.getElementById("withdrawAction");
+    const statusBanner = document.getElementById("statusBanner");
+    const mainStatus = document.getElementById("mainStatus");
+    const subStatusLabel = document.getElementById("subStatusLabel");
+    const statusMessage = document.getElementById("statusMessage");
+    const simulateStatus = document.getElementById("simulateStatus");
+    const actionRequiredPanel = document.getElementById("actionRequiredPanel");
+    const loanInfoPanel = document.getElementById("loanInfoPanel");
+    const bankUpdatePanel = document.getElementById("bankUpdatePanel");
+    const bankUpdateForm = document.getElementById("bankUpdateForm");
+    const updateBankBtn = document.getElementById("updateBankBtn");
+    const bankUpdateFeedback = document.getElementById("bankUpdateFeedback");
+    const saveBankUpdate = document.getElementById("saveBankUpdate");
+    const closedBanner = document.getElementById("closedBanner");
+
+    const withdrawModal = document.getElementById("withdrawModal");
+    const withdrawCancel = document.getElementById("withdrawCancel");
+    const withdrawConfirm = document.getElementById("withdrawConfirm");
+    const withdrawConsent = document.getElementById("withdrawConsent");
+    const withdrawReason = document.getElementById("withdrawReason");
+    const withdrawReasonMeta = document.getElementById("withdrawReasonMeta");
+
+
+    const bankSummary = {
+      name: document.getElementById("bankSummaryName"),
+      number: document.getElementById("bankSummaryNumber"),
+      bank: document.getElementById("bankSummaryBank"),
+      branch: document.getElementById("bankSummaryBranch"),
+      ifsc: document.getElementById("bankSummaryIfsc")
+    };
+    const bankUpdateFields = {
+      accName: document.getElementById("updAccName"),
+      accNumber: document.getElementById("updAccNumber"),
+      bankName: document.getElementById("updBankName"),
+      branchName: document.getElementById("updBranchName"),
+      ifsc: document.getElementById("updIfsc"),
+      chequeFile: document.getElementById("updChequeFile"),
+      signatureFile: document.getElementById("updSignatureFile")
+    };
+
+    const statusConfig = {
+      "Request Submitted": {
+        main: "Open",
+        message: "We have received your request and will start reviewing it.",
+        step: 1
+      },
+      "Refund Amount Review in Progress": {
+        main: "In Progress",
+        message: "Your refund amount is under review.",
+        step: 1
+      },
+      "Action Required From You": {
+        main: "In Progress",
+        message: "Action required: please update the requested information.",
+        step: 1
+      },
+      "Processing Cancellation": {
+        main: "In Progress",
+        message: "Your cancellation is under processing.",
+        step: 1
+      },
+      "Application sent for processing": {
+        main: "In Progress",
+        message: "Your application has been sent for processing.",
+        step: 1
+      },
+      "Refund completed": {
+        main: "Closed",
+        message: "Your refund has been processed successfully.",
+        step: 2
+      },
+      "No refund applicable": {
+        main: "Closed",
+        message: "Your request was reviewed and no refund is applicable as per policy.",
+        step: 2
+      },
+      "Request Withdrawn": {
+        main: "Closed",
+        message: "You have withdrawn your request.",
+        step: 2
+      }
+    };
+
+    const state = {
+      studentName: "Student",
+      ticketId: "RFD-000000",
+      refundAmount: "₹ 0",
+      paymentMode: "Self Paid",
+      subStatus: "Refund Amount Review in Progress",
+      appliedDate: "",
+      bankDetails: {
+        accName: "",
+        accNumber: "",
+        bankName: "",
+        branchName: "",
+        ifsc: ""
+      },
+      bankDocuments: {
+        cheque: null,
+        signature: null
+      },
+      bankUpdateUsed: false,
+      bankEditOriginal: null
+    };
+
+    const normalizePaymentMode = (value) => {
+      const mode = String(value || "").trim();
+      if (mode === "Direct Payment") return "Self Paid";
+      if (mode === "Direct + Loan" || mode.startsWith("Loan -")) return "Self+Loan";
+      if (mode === "Self+Loan") return "Self+Loan";
+      return "Self Paid";
+    };
+
+    const loadState = () => {
+      const raw = localStorage.getItem("refundStatusData");
+      if (!raw) {
+        state.subStatus = "Request Submitted";
+        saveState();
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        state.ticketId = data.ticketId || state.ticketId;
+        state.refundAmount = data.refundAmount || state.refundAmount;
+        state.paymentMode = normalizePaymentMode(data.paymentMode || state.paymentMode);
+        state.subStatus = data.subStatus || state.subStatus;
+        state.appliedDate = data.appliedDate || state.appliedDate;
+        state.studentName = data.studentName || state.studentName;
+        state.bankDetails = data.bankDetails || state.bankDetails;
+        state.bankDocuments = data.bankDocuments || state.bankDocuments;
+        state.bankUpdateUsed = !!data.bankUpdateUsed;
+      } catch (err) {
+        return;
+      }
+    };
+
+    const saveState = () => {
+      let existing = {};
+      try {
+        existing = JSON.parse(localStorage.getItem("refundStatusData") || "{}");
+      } catch (err) {
+        existing = {};
+      }
+      const next = {
+        ...existing,
+        ticketId: state.ticketId,
+        refundAmount: state.refundAmount,
+        paymentMode: state.paymentMode,
+        subStatus: state.subStatus,
+        appliedDate: state.appliedDate,
+        studentName: state.studentName,
+        bankDetails: state.bankDetails,
+        bankDocuments: state.bankDocuments,
+        bankUpdateUsed: state.bankUpdateUsed
+      };
+      localStorage.setItem("refundStatusData", JSON.stringify(next));
+    };
+
+    const populateBankSummary = () => {
+      bankSummary.name.value = state.bankDetails.accName || "-";
+      bankSummary.number.value = state.bankDetails.accNumber || "-";
+      bankSummary.bank.value = state.bankDetails.bankName || "-";
+      bankSummary.branch.value = state.bankDetails.branchName || "-";
+      bankSummary.ifsc.value = state.bankDetails.ifsc || "-";
+    };
+
+    const populateBankUpdate = () => {
+      bankUpdateFields.accName.value = state.bankDetails.accName || "";
+      bankUpdateFields.accNumber.value = state.bankDetails.accNumber || "";
+      bankUpdateFields.bankName.value = state.bankDetails.bankName || "";
+      bankUpdateFields.branchName.value = state.bankDetails.branchName || "";
+      bankUpdateFields.ifsc.value = state.bankDetails.ifsc || "";
+    };
+    const setBankUpdateEditable = (enabled) => {
+      bankUpdateFields.accName.disabled = !enabled;
+      bankUpdateFields.accNumber.disabled = !enabled;
+      bankUpdateFields.bankName.disabled = !enabled;
+      bankUpdateFields.branchName.disabled = !enabled;
+      bankUpdateFields.ifsc.disabled = !enabled;
+      bankUpdateFields.chequeFile.disabled = !enabled;
+      bankUpdateFields.signatureFile.disabled = !enabled;
+    };
+
+    const captureBankEditOriginal = () => {
+      state.bankEditOriginal = {
+        accName: bankUpdateFields.accName.value.trim(),
+        accNumber: bankUpdateFields.accNumber.value.trim(),
+        bankName: bankUpdateFields.bankName.value.trim(),
+        branchName: bankUpdateFields.branchName.value.trim(),
+        ifsc: bankUpdateFields.ifsc.value.trim().toUpperCase()
+      };
+    };
+
+    const hasBankEditChanged = () => {
+      if (!state.bankEditOriginal) return false;
+      return (
+        bankUpdateFields.accName.value.trim() !== state.bankEditOriginal.accName ||
+        bankUpdateFields.accNumber.value.trim() !== state.bankEditOriginal.accNumber ||
+        bankUpdateFields.bankName.value.trim() !== state.bankEditOriginal.bankName ||
+        bankUpdateFields.branchName.value.trim() !== state.bankEditOriginal.branchName ||
+        bankUpdateFields.ifsc.value.trim().toUpperCase() !== state.bankEditOriginal.ifsc
+      );
+    };
+
+    const setError = (input, messageId, isActive) => {
+      const message = document.getElementById(messageId);
+      if (isActive) {
+        message.classList.add("active");
+        input.setAttribute("aria-invalid", "true");
+      } else {
+        message.classList.remove("active");
+        input.removeAttribute("aria-invalid");
+      }
+    };
+
+    const MAX_DOC_PREVIEW_SIZE = 900 * 1024;
+    const toDataUrl = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Unable to read file"));
+      reader.readAsDataURL(file);
+    });
+
+    const serializeFileForStorage = async (file) => {
+      if (!file) return null;
+      const doc = { name: file.name, type: file.type, size: file.size, dataUrl: "" };
+      if (file.size <= MAX_DOC_PREVIEW_SIZE) {
+        try {
+          doc.dataUrl = await toDataUrl(file);
+        } catch (err) {
+          doc.dataUrl = "";
+        }
+      }
+      return doc;
+    };
+
+    const validateBankUpdateFields = () => {
+      let valid = true;
+      const nameValid = bankUpdateFields.accName.value.trim().length > 0;
+      setError(bankUpdateFields.accName, "updAccNameError", !nameValid);
+      valid = valid && nameValid;
+
+      const accValue = bankUpdateFields.accNumber.value.trim();
+      const accValid = /^\\d{9,18}$/.test(accValue);
+      setError(bankUpdateFields.accNumber, "updAccNumberError", !accValid);
+      valid = valid && accValid;
+
+      const bankValid = bankUpdateFields.bankName.value.trim().length > 0;
+      setError(bankUpdateFields.bankName, "updBankNameError", !bankValid);
+      valid = valid && bankValid;
+
+      const branchValid = bankUpdateFields.branchName.value.trim().length > 0;
+      setError(bankUpdateFields.branchName, "updBranchNameError", !branchValid);
+      valid = valid && branchValid;
+
+      const ifscValue = bankUpdateFields.ifsc.value.trim().toUpperCase();
+      bankUpdateFields.ifsc.value = ifscValue;
+      const ifscValid = /^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscValue);
+      setError(bankUpdateFields.ifsc, "updIfscError", !ifscValid);
+      valid = valid && ifscValid;
+
+      const chequeFile = bankUpdateFields.chequeFile.files[0];
+      const chequeValid = !!chequeFile &&
+        (chequeFile.type == "application/pdf" || chequeFile.type == "image/png" || chequeFile.type == "image/jpeg") &&
+        chequeFile.size <= 5 * 1024 * 1024;
+      setError(bankUpdateFields.chequeFile, "updChequeFileError", !chequeValid);
+      valid = valid && chequeValid;
+
+      const sigFile = bankUpdateFields.signatureFile.files[0];
+      const sigValid = !!sigFile &&
+        (sigFile.type == "image/png" || sigFile.type == "image/jpeg") &&
+        sigFile.size <= 5 * 1024 * 1024;
+      setError(bankUpdateFields.signatureFile, "updSignatureFileError", !sigValid);
+      valid = valid && sigValid;
+
+      return valid;
+    };
+
+    const updateStatusUI = () => {
+      const config = statusConfig[state.subStatus] || statusConfig["Request Submitted"];
+      let main = config.main;
+      const subStatusNote = document.getElementById("subStatusNote");
+
+      ticketMeta.textContent = `Ticket ID: ${state.ticketId || "-"}`;
+      appliedMeta.textContent = `Date Applied: ${state.appliedDate || "-"}`;
+      refundMeta.textContent = `Refund Amount: ${state.refundAmount || "-"}`;
+      if (state.subStatus === "Refund Amount Review in Progress") {
+        refundMeta.style.display = "none";
+      } else if (state.subStatus === "Application sent for processing") {
+        refundMeta.style.display = "inline";
+      } else {
+        refundMeta.style.display = "inline";
+      }
+      studentNameLabel.textContent = state.studentName || "Student";
+      const allowsBankUpdate = state.paymentMode === "Self Paid" || state.paymentMode === "Self+Loan";
+      mainStatus.textContent = main;
+      subStatusLabel.textContent = state.subStatus;
+      statusMessage.textContent = config.message;
+      simulateStatus.value = state.subStatus;
+      subStatusNote.textContent = state.subStatus;
+      document.getElementById("subStatusHint").textContent = config.message;
+
+      const isClosed = main === "Closed";
+
+      const showActionRequired = state.subStatus === "Action Required From You";
+      const showProcessing = state.subStatus === "Processing Cancellation";
+      actionRequiredPanel.hidden = !showActionRequired;
+      loanInfoPanel.hidden = !(showActionRequired && !allowsBankUpdate);
+      bankUpdatePanel.hidden = !(showActionRequired && allowsBankUpdate);
+
+      if (showProcessing && allowsBankUpdate) {
+        populateBankSummary();
+        bankUpdateForm.hidden = true;
+        bankUpdateFeedback.textContent = "";
+      }
+
+      if (isClosed) {
+        closedBanner.hidden = false;
+        closedBanner.textContent = config.message;
+      } else {
+        closedBanner.hidden = true;
+      }
+
+      const subStatusKey = (state.subStatus || "").toLowerCase().trim();
+      statusBanner.hidden = subStatusKey.includes("request withdrawn") || subStatusKey.includes("refund completed") || subStatusKey.includes("no refund applicable");
+      withdrawAction.hidden = isClosed;
+
+    };
+
+    const openWithdrawModal = () => {
+      withdrawModal.hidden = false;
+      withdrawConsent.checked = false;
+      withdrawReason.value = "";
+      withdrawReasonMeta.textContent = "0 / 1000";
+      withdrawConfirm.disabled = true;
+    };
+
+    const closeWithdrawModal = () => {
+      withdrawModal.hidden = true;
+    };
+
+    simulateStatus.addEventListener("change", () => {
+      state.subStatus = simulateStatus.value;
+      saveState();
+      updateStatusUI();
+    });
+
+    const updateWithdrawSubmitState = () => {
+      const reasonOk = withdrawReason.value.trim().length > 0;
+      withdrawConfirm.disabled = !(withdrawConsent.checked && reasonOk);
+    };
+
+    withdrawConsent.addEventListener("change", updateWithdrawSubmitState);
+    withdrawReason.addEventListener("input", () => {
+      withdrawReasonMeta.textContent = `${withdrawReason.value.length} / 1000`;
+      updateWithdrawSubmitState();
+    });
+
+    withdrawAction.addEventListener("click", openWithdrawModal);
+    withdrawCancel.addEventListener("click", closeWithdrawModal);
+    withdrawConfirm.addEventListener("click", () => {
+      if (withdrawConfirm.disabled) {
+        return;
+      }
+      closeWithdrawModal();
+      state.subStatus = "Request Withdrawn";
+      saveState();
+      updateStatusUI();
+      closedBanner.hidden = false;
+      closedBanner.textContent = "Your application has been withdrawn successfully.";
+    });
+
+
+    Object.values(bankUpdateFields).forEach((field) => {
+      field.addEventListener("input", () => {
+        if (state.bankUpdateUsed) return;
+        saveBankUpdate.disabled = !hasBankEditChanged();
+      });
+    });
+    bankUpdateFields.chequeFile.addEventListener("change", () => {
+      if (state.bankUpdateUsed) return;
+      saveBankUpdate.disabled = !hasBankEditChanged();
+    });
+    bankUpdateFields.signatureFile.addEventListener("change", () => {
+      if (state.bankUpdateUsed) return;
+      saveBankUpdate.disabled = !hasBankEditChanged();
+    });
+
+    updateBankBtn.addEventListener("click", () => {
+      if (state.bankUpdateUsed) {
+        bankUpdateFeedback.textContent = "Bank details can only be updated once.";
+        bankUpdateForm.hidden = true;
+        return;
+      }
+      populateBankSummary();
+      populateBankUpdate();
+      captureBankEditOriginal();
+      saveBankUpdate.disabled = true;
+      bankUpdateFields.chequeFile.value = "";
+      bankUpdateFields.signatureFile.value = "";
+      setBankUpdateEditable(true);
+      bankUpdateForm.hidden = false;
+      bankUpdateFeedback.textContent = "";
+    });
+
+    saveBankUpdate.addEventListener("click", async () => {
+      if (state.bankUpdateUsed) {
+        bankUpdateFeedback.textContent = "Bank details can only be updated once.";
+        return;
+      }
+      if (!validateBankUpdateFields()) {
+        return;
+      }
+      const chequeDoc = await serializeFileForStorage(bankUpdateFields.chequeFile.files[0]);
+      const signatureDoc = await serializeFileForStorage(bankUpdateFields.signatureFile.files[0]);
+      state.bankUpdateUsed = true;
+      state.bankDetails = {
+        accName: bankUpdateFields.accName.value.trim(),
+        accNumber: bankUpdateFields.accNumber.value.trim(),
+        bankName: bankUpdateFields.bankName.value.trim(),
+        branchName: bankUpdateFields.branchName.value.trim(),
+        ifsc: bankUpdateFields.ifsc.value.trim().toUpperCase()
+      };
+      state.bankDocuments = {
+        cheque: chequeDoc,
+        signature: signatureDoc
+      };
+      try {
+        saveState();
+      } catch (err) {
+        state.bankDocuments = {
+          cheque: state.bankDocuments.cheque ? { ...state.bankDocuments.cheque, dataUrl: "" } : null,
+          signature: state.bankDocuments.signature ? { ...state.bankDocuments.signature, dataUrl: "" } : null
+        };
+        saveState();
+      }
+      bankUpdateForm.hidden = true;
+      populateBankSummary();
+      saveBankUpdate.disabled = true;
+      setBankUpdateEditable(false);
+      bankUpdateFeedback.textContent = "Bank details updated. We will continue processing.";
+    });
+
+    loadState();
+    populateBankSummary();
+    setBankUpdateEditable(false);
+    updateStatusUI();
+  </script>
+</body>
+</html>
