@@ -466,6 +466,18 @@
       max-height: none;
     }
 
+    .calculator-result {
+      margin-top: 12px;
+    }
+
+    .calculator-result[hidden] {
+      display: none !important;
+    }
+
+    .calculator-summary {
+      margin-top: 12px;
+    }
+
     .process-card {
       background: #ffffff;
     }
@@ -636,6 +648,7 @@
           <button type="button" id="tabBtn2" class="btn-secondary">Finance + Final Update</button>
           <button type="button" id="tabBtn3" class="btn-secondary">Policy Master</button>
           <button type="button" id="tabBtn4" class="btn-secondary">Admin Timeline</button>
+          <button type="button" id="tabBtn5" class="btn-secondary">Refund Calculator</button>
         </div>
       </section>
 
@@ -1001,6 +1014,101 @@
         </section>
       </section>
 
+      <section id="tabPanel5" class="tab-panel" hidden>
+        <section class="twocol">
+          <section id="refundCalculatorSection" class="card">
+            <h2>Refund Calculator</h2>
+            <div class="helper">Admissions and Finance can use this calculator independently of the workflow review tab.</div>
+            <div class="grid" style="margin-top: 10px;">
+              <div class="field">
+                <label for="calcUniversity">University</label>
+                <select id="calcUniversity">
+                  <option value="VIT">VIT</option>
+                  <option value="BU">BU</option>
+                  <option value="UMass Global">UMass Global</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="calcPolicyVersion">Published Policy</label>
+                <select id="calcPolicyVersion"></select>
+              </div>
+              <div class="field">
+                <label for="calcPaymentMode">Payment Mode</label>
+                <select id="calcPaymentMode">
+                  <option value="Self Paid">Self Paid</option>
+                  <option value="Self+Loan">Self + Loan</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="calcFeePaymentType">Fee Payment Type</label>
+                <select id="calcFeePaymentType">
+                  <option value="Semester">Semester fees</option>
+                  <option value="Annual">Annual fees</option>
+                  <option value="FullFeeSelf">Full fees - Self</option>
+                  <option value="FullFeeSelfLoan">Full fees - Self + loan</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="calcRequestDate">Refund Request Date</label>
+                <input id="calcRequestDate" type="date" />
+              </div>
+              <div class="field">
+                <label for="calcAdmissionLastDate">Admission Last Date</label>
+                <input id="calcAdmissionLastDate" type="date" />
+              </div>
+              <div class="field">
+                <label for="calcActualAmountPaid">Actual Amount Paid After Discount</label>
+                <input id="calcActualAmountPaid" type="number" min="0" step="0.01" />
+              </div>
+              <div class="field">
+                <label for="calcFirstYearFee">Year 1 Fee Without Discount</label>
+                <input id="calcFirstYearFee" type="number" min="0" step="0.01" />
+              </div>
+              <div class="field">
+                <label for="calcTotalProgramFee">Total Programme Fee Without Discount</label>
+                <input id="calcTotalProgramFee" type="number" min="0" step="0.01" />
+              </div>
+              <div class="field">
+                <label for="calcHasScholarship">Scholarship Applied</label>
+                <select id="calcHasScholarship">
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </div>
+              <div id="calcStudentContributionField" class="field">
+                <label for="calcStudentContributionAmount">Student Contribution Amount</label>
+                <input id="calcStudentContributionAmount" type="number" min="0" step="0.01" />
+              </div>
+              <div id="calcLoanAmountField" class="field">
+                <label for="calcLoanAmount">Loan Amount</label>
+                <input id="calcLoanAmount" type="number" min="0" step="0.01" />
+              </div>
+            </div>
+            <div id="calculatorError" class="error-text">Complete the required calculator inputs first.</div>
+            <div class="actions sticky-actions">
+              <button type="button" id="calculateRefundBtn" class="btn-primary">Calculate Refund</button>
+              <button type="button" id="resetCalculatorBtn" class="btn-secondary">Reset Calculator</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Calculated Output</h2>
+            <div id="calculatorEmptyState" class="empty">Select a policy, enter the required values, and click Calculate Refund.</div>
+            <div id="calculatorResultWrap" class="calculator-result" hidden>
+              <div class="meta-grid">
+                <div class="meta-item"><b>Refund Category</b><span id="calcResultCategory">-</span></div>
+                <div class="meta-item"><b>Refund Percentage</b><span id="calcResultPercentage">-</span></div>
+                <div class="meta-item"><b>Deduction Amount</b><span id="calcResultDeduction">-</span></div>
+                <div class="meta-item"><b>Final Refund Amount</b><span id="calcResultFinalRefund">-</span></div>
+                <div class="meta-item"><b>Student Refund Payout</b><span id="calcResultStudentPayout">-</span></div>
+                <div class="meta-item"><b>Lender Refund Payout</b><span id="calcResultLenderPayout">-</span></div>
+              </div>
+              <div id="calcResultSummary" class="helper-modal-body calculator-summary"></div>
+            </div>
+          </section>
+        </section>
+      </section>
+
       <section id="studentPanel" hidden>
         <h2>Student Portal</h2>
         <div class="student-tabs">
@@ -1152,10 +1260,12 @@
       tabBtn2: document.getElementById("tabBtn2"),
       tabBtn3: document.getElementById("tabBtn3"),
       tabBtn4: document.getElementById("tabBtn4"),
+      tabBtn5: document.getElementById("tabBtn5"),
       tabPanel1: document.getElementById("tabPanel1"),
       tabPanel2: document.getElementById("tabPanel2"),
       tabPanel3: document.getElementById("tabPanel3"),
       tabPanel4: document.getElementById("tabPanel4"),
+      tabPanel5: document.getElementById("tabPanel5"),
       ownerChip: document.getElementById("ownerChip"),
       step1: document.getElementById("step1"),
       step2: document.getElementById("step2"),
@@ -1288,7 +1398,34 @@
       admissionsFinalNote: document.getElementById("admissionsFinalNote"),
       admissionsFinalError: document.getElementById("admissionsFinalError"),
       updateStudentStatus: document.getElementById("updateStudentStatus"),
-      timeline: document.getElementById("timeline")
+      timeline: document.getElementById("timeline"),
+      refundCalculatorSection: document.getElementById("refundCalculatorSection"),
+      calcUniversity: document.getElementById("calcUniversity"),
+      calcPolicyVersion: document.getElementById("calcPolicyVersion"),
+      calcPaymentMode: document.getElementById("calcPaymentMode"),
+      calcFeePaymentType: document.getElementById("calcFeePaymentType"),
+      calcRequestDate: document.getElementById("calcRequestDate"),
+      calcAdmissionLastDate: document.getElementById("calcAdmissionLastDate"),
+      calcActualAmountPaid: document.getElementById("calcActualAmountPaid"),
+      calcFirstYearFee: document.getElementById("calcFirstYearFee"),
+      calcTotalProgramFee: document.getElementById("calcTotalProgramFee"),
+      calcHasScholarship: document.getElementById("calcHasScholarship"),
+      calcStudentContributionField: document.getElementById("calcStudentContributionField"),
+      calcLoanAmountField: document.getElementById("calcLoanAmountField"),
+      calcStudentContributionAmount: document.getElementById("calcStudentContributionAmount"),
+      calcLoanAmount: document.getElementById("calcLoanAmount"),
+      calculatorError: document.getElementById("calculatorError"),
+      calculateRefundBtn: document.getElementById("calculateRefundBtn"),
+      resetCalculatorBtn: document.getElementById("resetCalculatorBtn"),
+      calculatorEmptyState: document.getElementById("calculatorEmptyState"),
+      calculatorResultWrap: document.getElementById("calculatorResultWrap"),
+      calcResultCategory: document.getElementById("calcResultCategory"),
+      calcResultPercentage: document.getElementById("calcResultPercentage"),
+      calcResultDeduction: document.getElementById("calcResultDeduction"),
+      calcResultFinalRefund: document.getElementById("calcResultFinalRefund"),
+      calcResultStudentPayout: document.getElementById("calcResultStudentPayout"),
+      calcResultLenderPayout: document.getElementById("calcResultLenderPayout"),
+      calcResultSummary: document.getElementById("calcResultSummary")
     };
 
     const money = (val) => `Rs ${new Intl.NumberFormat("en-IN").format(Math.round(Number(val) || 0))}`;
@@ -1299,6 +1436,22 @@
     };
 
     const today = () => new Date().toISOString().slice(0, 10);
+
+    const defaultRefundCalculator = () => ({
+      university: "VIT",
+      policyVersion: "",
+      paymentMode: "Self Paid",
+      requestDate: today(),
+      admissionLastDate: ADMISSION_LAST_DATE_DEFAULT,
+      actualAmountPaid: "",
+      feePaymentType: "Annual",
+      firstYearFee: "",
+      totalProgramFee: "",
+      hasScholarship: false,
+      studentContributionAmount: "",
+      loanAmount: "",
+      result: null
+    });
 
     const normalizePaymentMode = (value) => {
       const mode = String(value || "").trim();
@@ -1578,6 +1731,7 @@
         activeRole: "Admissions",
         activeAdminTab: "tab1",
         studentActiveTab: "form",
+        refundCalculator: defaultRefundCalculator(),
         policyMaster: {
           policies: defaultPolicyConfig.map((policy, idx) => normalizePolicy(policy, idx))
         },
@@ -1738,6 +1892,18 @@
         merged.university = parsed.university || "VIT";
         merged.adminTrail = Array.isArray(parsed.adminTrail) ? parsed.adminTrail : [];
         merged.adminData = { ...defaultState().adminData, ...(parsed.adminData || {}) };
+        merged.adminData.refundCalculator = {
+          ...defaultRefundCalculator(),
+          ...(((parsed.adminData || {}).refundCalculator) || {})
+        };
+        merged.adminData.refundCalculator.university = merged.adminData.refundCalculator.university || merged.university || "VIT";
+        merged.adminData.refundCalculator.paymentMode = normalizePaymentMode(
+          merged.adminData.refundCalculator.paymentMode || "Self Paid"
+        );
+        merged.adminData.refundCalculator.requestDate = merged.adminData.refundCalculator.requestDate || today();
+        merged.adminData.refundCalculator.admissionLastDate =
+          merged.adminData.refundCalculator.admissionLastDate || ADMISSION_LAST_DATE_DEFAULT;
+        merged.adminData.refundCalculator.hasScholarship = toBool(merged.adminData.refundCalculator.hasScholarship);
         if (merged.adminData.admissionsReview) {
           merged.adminData.admissionsReview.admissionLastDate =
             merged.adminData.admissionsReview.admissionLastDate ||
@@ -1892,13 +2058,78 @@
       return `Policy ${nextNum}`;
     };
 
+    const getCalculator = () => {
+      if (!state.adminData.refundCalculator) {
+        state.adminData.refundCalculator = defaultRefundCalculator();
+      }
+      return state.adminData.refundCalculator;
+    };
+
+    const getCalculatorPolicy = () => {
+      const calc = getCalculator();
+      if (!calc.policyVersion) return null;
+      return getPublishedPolicies(calc.university).find((policy) => policy.version === calc.policyVersion)
+        || getPoliciesForUniversity(calc.university).find((policy) => policy.version === calc.policyVersion)
+        || null;
+    };
+
+    const syncCalculatorPolicyOptions = () => {
+      const calc = getCalculator();
+      const published = getPublishedPolicies(calc.university);
+      dom.calcPolicyVersion.innerHTML = published.length
+        ? published.map((policy) => `<option>${policy.version}</option>`).join("")
+        : "<option>No Published Policies</option>";
+      const selected = published.find((policy) => policy.version === calc.policyVersion);
+      if (!selected) {
+        const resolved = published.find((policy) =>
+          (calc.requestDate || today()) >= policy.effectiveFrom && (calc.requestDate || today()) <= policy.effectiveTo
+        );
+        calc.policyVersion = (resolved || published[0] || null)?.version || "";
+      }
+      if (calc.policyVersion) {
+        dom.calcPolicyVersion.value = calc.policyVersion;
+      }
+    };
+
+    const applyCalculatorPolicyDefaults = (force = false) => {
+      const calc = getCalculator();
+      const policy = getCalculatorPolicy();
+      if (!policy) return;
+      if (force || !calc.admissionLastDate) {
+        calc.admissionLastDate = policy.admissionLastDate || ADMISSION_LAST_DATE_DEFAULT;
+      }
+      if (force || !FEE_PAYMENT_TYPE_LABELS[calc.feePaymentType]) {
+        calc.feePaymentType = policy.defaultFeePaymentType || "Annual";
+      }
+      if (force || calc.firstYearFee === "" || calc.firstYearFee === null || calc.firstYearFee === undefined) {
+        calc.firstYearFee = policy.firstYearFee || "";
+      }
+      if (force || calc.totalProgramFee === "" || calc.totalProgramFee === null || calc.totalProgramFee === undefined) {
+        calc.totalProgramFee = policy.totalProgramFee || "";
+      }
+      if (!isLoanCase(calc.paymentMode)) {
+        calc.studentContributionAmount = calc.actualAmountPaid || 0;
+        calc.loanAmount = 0;
+      }
+    };
+
+    const ensureCalculatorData = () => {
+      const calc = getCalculator();
+      calc.university = calc.university || getCurrentUniversity();
+      calc.paymentMode = normalizePaymentMode(calc.paymentMode || "Self Paid");
+      calc.requestDate = calc.requestDate || today();
+      syncCalculatorPolicyOptions();
+      applyCalculatorPolicyDefaults();
+    };
+
     const setActiveAdminTab = (tabId) => {
       state.adminData.activeAdminTab = tabId;
       const tabs = [
         { btn: dom.tabBtn1, panel: dom.tabPanel1, id: "tab1" },
         { btn: dom.tabBtn2, panel: dom.tabPanel2, id: "tab2" },
         { btn: dom.tabBtn3, panel: dom.tabPanel3, id: "tab3" },
-        { btn: dom.tabBtn4, panel: dom.tabPanel4, id: "tab4" }
+        { btn: dom.tabBtn4, panel: dom.tabPanel4, id: "tab4" },
+        { btn: dom.tabBtn5, panel: dom.tabPanel5, id: "tab5" }
       ];
       tabs.forEach((item) => {
         const active = item.id === tabId;
@@ -2209,6 +2440,50 @@
       dom.admissionsReviewError.classList.remove("active");
     };
 
+    const renderCalculator = () => {
+      ensureCalculatorData();
+      const calc = getCalculator();
+      const loanCase = isLoanCase(calc.paymentMode);
+      const policy = getCalculatorPolicy();
+
+      dom.calcUniversity.value = calc.university || "VIT";
+      dom.calcPaymentMode.value = normalizePaymentMode(calc.paymentMode);
+      dom.calcRequestDate.value = calc.requestDate || today();
+      dom.calcAdmissionLastDate.value = calc.admissionLastDate || (policy && policy.admissionLastDate) || ADMISSION_LAST_DATE_DEFAULT;
+      dom.calcActualAmountPaid.value = calc.actualAmountPaid;
+      dom.calcFeePaymentType.value = calc.feePaymentType || "Annual";
+      dom.calcFirstYearFee.value = calc.firstYearFee;
+      dom.calcTotalProgramFee.value = calc.totalProgramFee;
+      dom.calcHasScholarship.value = String(!!calc.hasScholarship);
+      dom.calcStudentContributionAmount.value = loanCase ? calc.studentContributionAmount : (calc.actualAmountPaid || 0);
+      dom.calcLoanAmount.value = loanCase ? calc.loanAmount : 0;
+      dom.calcStudentContributionField.hidden = !loanCase;
+      dom.calcLoanAmountField.hidden = !loanCase;
+
+      const result = calc.result;
+      setVisible(dom.calculatorEmptyState, !result);
+      setVisible(dom.calculatorResultWrap, !!result);
+      dom.calculatorError.classList.remove("active");
+      if (!result || !policy) {
+        dom.calcResultCategory.textContent = "-";
+        dom.calcResultPercentage.textContent = "-";
+        dom.calcResultDeduction.textContent = "-";
+        dom.calcResultFinalRefund.textContent = "-";
+        dom.calcResultStudentPayout.textContent = "-";
+        dom.calcResultLenderPayout.textContent = "-";
+        dom.calcResultSummary.innerHTML = "Calculated deduction details will appear here.";
+        return;
+      }
+
+      dom.calcResultCategory.textContent = result.category || "-";
+      dom.calcResultPercentage.textContent = `${Number(result.refundPercentage || 0).toFixed(2)}%`;
+      dom.calcResultDeduction.textContent = money(result.deductionAmount);
+      dom.calcResultFinalRefund.textContent = money(result.finalRefundAmount);
+      dom.calcResultStudentPayout.textContent = money(result.studentPayoutAmount);
+      dom.calcResultLenderPayout.textContent = money(result.lenderPayoutAmount);
+      dom.calcResultSummary.innerHTML = buildDeductionHelperMarkup(policy, result);
+    };
+
     const renderTimeline = () => {
       if (!state.adminTrail.length) {
         dom.timeline.innerHTML = "<li>No admin updates yet.</li>";
@@ -2275,6 +2550,7 @@
         dom.tabPanel2.hidden = true;
         dom.tabPanel3.hidden = true;
         dom.tabPanel4.hidden = true;
+        dom.tabPanel5.hidden = true;
       } else {
         const requestedTab = state.adminData.activeAdminTab || "tab1";
         const effectiveTab = (!isAdmissions && requestedTab === "tab3") ? "tab2" : requestedTab;
@@ -2288,6 +2564,7 @@
       dom.financeSection.style.opacity = isAdmissions ? "0.75" : "1";
       dom.admissionsFinalSection.style.opacity = isAdmissions ? "1" : "0.75";
       dom.policyMasterSection.style.opacity = isAdmissions ? "1" : "0.75";
+      dom.refundCalculatorSection.style.opacity = "1";
 
       dom.savePolicy.hidden = !isAdmissions;
       dom.recalcSystem.hidden = !isAdmissions;
@@ -2355,6 +2632,8 @@
       dom.rejectNoRefundBtn.disabled = !isAdmissions || isClosed;
       dom.submitFinanceToAdmissions.disabled = !isFinance || stage !== "Sent To Finance";
       dom.updateStudentStatus.disabled = !isAdmissions || stage !== "Finance Returned";
+      dom.calculateRefundBtn.disabled = isStudent;
+      dom.resetCalculatorBtn.disabled = isStudent;
     };
 
     const renderSnapshot = () => {
@@ -2413,6 +2692,7 @@
       renderPolicyMasterDetails();
       renderReview();
       renderFinance();
+      renderCalculator();
       renderWorkflow();
       renderTimeline();
     };
@@ -2514,6 +2794,68 @@
       categories: dom.newPolicyStandard.value === "FlatAmount" ? [] : collectCategoryRulesFromBuilder(),
       status: dom.newPolicyStatus.value
     });
+
+    const updateCalculatorFromInputs = () => {
+      const calc = getCalculator();
+      calc.university = dom.calcUniversity.value || "VIT";
+      calc.policyVersion = dom.calcPolicyVersion.value === "No Published Policies" ? "" : dom.calcPolicyVersion.value;
+      calc.paymentMode = normalizePaymentMode(dom.calcPaymentMode.value || "Self Paid");
+      calc.requestDate = dom.calcRequestDate.value || today();
+      calc.admissionLastDate = dom.calcAdmissionLastDate.value || ADMISSION_LAST_DATE_DEFAULT;
+      calc.actualAmountPaid = Number(num(dom.calcActualAmountPaid.value).toFixed(2));
+      calc.feePaymentType = dom.calcFeePaymentType.value;
+      calc.firstYearFee = dom.calcFirstYearFee.value === "" ? "" : Number(num(dom.calcFirstYearFee.value).toFixed(2));
+      calc.totalProgramFee = dom.calcTotalProgramFee.value === "" ? "" : Number(num(dom.calcTotalProgramFee.value).toFixed(2));
+      calc.hasScholarship = dom.calcHasScholarship.value === "true";
+      calc.studentContributionAmount = Number(num(dom.calcStudentContributionAmount.value).toFixed(2));
+      calc.loanAmount = Number(num(dom.calcLoanAmount.value).toFixed(2));
+      if (!isLoanCase(calc.paymentMode)) {
+        calc.studentContributionAmount = calc.actualAmountPaid;
+        calc.loanAmount = 0;
+      }
+    };
+
+    const validateCalculatorInput = () => {
+      const calc = getCalculator();
+      const errors = [];
+      if (!calc.policyVersion) {
+        errors.push("Select a published policy for the calculator.");
+      } else if (!getCalculatorPolicy()) {
+        errors.push("Selected calculator policy is not available.");
+      }
+      if (!calc.requestDate) {
+        errors.push("Refund request date is required.");
+      }
+      if (!calc.admissionLastDate) {
+        errors.push("Admission last date is required.");
+      }
+      if (num(calc.actualAmountPaid) <= 0) {
+        errors.push("Actual amount paid must be greater than 0.");
+      }
+      if (num(calc.firstYearFee) < 0 || num(calc.totalProgramFee) < 0) {
+        errors.push("Fee amounts cannot be negative.");
+      }
+      if (isLoanCase(calc.paymentMode)) {
+        const fundingTotal = Number((num(calc.studentContributionAmount) + num(calc.loanAmount)).toFixed(2));
+        if (Math.abs(fundingTotal - num(calc.actualAmountPaid)) >= 1) {
+          errors.push("For Self + Loan, student contribution + loan amount must equal actual amount paid.");
+        }
+      }
+      dom.calculatorError.textContent = errors[0] || "Complete the required calculator inputs first.";
+      dom.calculatorError.classList.toggle("active", errors.length > 0);
+      return errors.length === 0;
+    };
+
+    const resetCalculator = () => {
+      state.adminData.refundCalculator = {
+        ...defaultRefundCalculator(),
+        university: getCurrentUniversity(),
+        paymentMode: state.paymentMode || "Self Paid"
+      };
+      ensureCalculatorData();
+      saveState();
+      renderCalculator();
+    };
 
     const validatePolicyInput = (policy) => {
       if (!policy.version || !policy.effectiveFrom || !policy.effectiveTo || !policy.admissionLastDate) {
@@ -2740,6 +3082,7 @@
       dom.tabBtn2.addEventListener("click", () => setActiveAdminTab("tab2"));
       dom.tabBtn3.addEventListener("click", () => setActiveAdminTab("tab3"));
       dom.tabBtn4.addEventListener("click", () => setActiveAdminTab("tab4"));
+      dom.tabBtn5.addEventListener("click", () => setActiveAdminTab("tab5"));
       dom.viewChequeDocBtn.addEventListener("click", () => openSubmittedDoc(state.bankDocuments?.cheque, "Cheque document"));
       dom.viewSignatureDocBtn.addEventListener("click", () => openSubmittedDoc(state.bankDocuments?.signature, "Signature document"));
       dom.deductionInfoBtn.addEventListener("click", () => {
@@ -2763,6 +3106,79 @@
         renderPolicyMasterDetails();
         renderReview();
         saveState();
+      });
+
+      dom.calcUniversity.addEventListener("change", () => {
+        updateCalculatorFromInputs();
+        const calc = getCalculator();
+        calc.policyVersion = "";
+        calc.result = null;
+        syncCalculatorPolicyOptions();
+        applyCalculatorPolicyDefaults(true);
+        saveState();
+        renderCalculator();
+      });
+
+      dom.calcPolicyVersion.addEventListener("change", () => {
+        updateCalculatorFromInputs();
+        const calc = getCalculator();
+        calc.result = null;
+        applyCalculatorPolicyDefaults(true);
+        saveState();
+        renderCalculator();
+      });
+
+      dom.calcPaymentMode.addEventListener("change", () => {
+        updateCalculatorFromInputs();
+        const calc = getCalculator();
+        calc.result = null;
+        applyCalculatorPolicyDefaults();
+        saveState();
+        renderCalculator();
+      });
+
+      [
+        dom.calcFeePaymentType,
+        dom.calcRequestDate,
+        dom.calcAdmissionLastDate,
+        dom.calcActualAmountPaid,
+        dom.calcFirstYearFee,
+        dom.calcTotalProgramFee,
+        dom.calcHasScholarship,
+        dom.calcStudentContributionAmount,
+        dom.calcLoanAmount
+      ].forEach((input) => {
+        const handleCalculatorFieldChange = () => {
+          updateCalculatorFromInputs();
+          getCalculator().result = null;
+          dom.calculatorError.classList.remove("active");
+          saveState();
+        };
+        input.addEventListener("input", handleCalculatorFieldChange);
+        input.addEventListener("change", handleCalculatorFieldChange);
+      });
+
+      dom.calculateRefundBtn.addEventListener("click", () => {
+        updateCalculatorFromInputs();
+        syncCalculatorPolicyOptions();
+        applyCalculatorPolicyDefaults();
+        if (!validateCalculatorInput()) return;
+        const calc = getCalculator();
+        const policy = getCalculatorPolicy();
+        calc.result = computeSystemReview(
+          calc.actualAmountPaid,
+          calc.requestDate,
+          calc.admissionLastDate,
+          policy,
+          calc.paymentMode,
+          calc
+        );
+        saveState();
+        renderCalculator();
+      });
+
+      dom.resetCalculatorBtn.addEventListener("click", () => {
+        resetCalculator();
       });
 
       dom.policyTableBody.addEventListener("click", (event) => {
@@ -2985,10 +3401,11 @@
 
       initPolicyOptions();
       ensureReviewData();
+      ensureCalculatorData();
       if (state.adminData.activeRole !== "Admissions" && state.adminData.activeRole !== "Finance" && state.adminData.activeRole !== "Student") {
         state.adminData.activeRole = "Admissions";
       }
-      if (!["tab1", "tab2", "tab3", "tab4"].includes(state.adminData.activeAdminTab)) {
+      if (!["tab1", "tab2", "tab3", "tab4", "tab5"].includes(state.adminData.activeAdminTab)) {
         state.adminData.activeAdminTab = "tab1";
       }
       saveState();
